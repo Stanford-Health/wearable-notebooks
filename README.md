@@ -6,35 +6,27 @@ List of notebooks from [Wearipedia.com](http://wearipedia.com).
 
 #### Wrist devices
 * Fitbit Sense
-* Fitbit Charge 4
-* Apple Watch Ultra
+* Fitbit Charge
 * Actigraph CentrePoint Insight
-* [Garmin Fenix 7S](https://colab.research.google.com/github/Stanford-Health/Wearible-notebooks/blob/main/notebooks/GarminFenix_7S.ipynb)
-* Polar Vantage 2
-* Suunto 9 Peak Pro
-* Whoop Strap 4.0
+* Garmin Fenix
+* Polar Vantage
+* Whoop Strap
 * Withings Scan Watch
-* Coros Pace 2
 
 #### HR monitors
 * Polar Verity Sense
-* Suunto HR Monitor
+* Polar H
 
 #### Smart Scales
 * Withings Body+
 
-#### Smart phones
-* iPhone 14 Pro
-
 #### CGM sensors
-* Dexcom Pro G6
-* Nutrisense (Abbott FreeStyle Libre)
-* Abbott FreeStyle Libre 2
+* Dexcom G Pro series
+* Abbott FreeStyle Libre
 
 #### Sleep devices
-* Dreem Headband 3
+* Dreem Headband
 * Withings Sleep
-* SleepOn go2sleep
 
 #### Apps
 * Cronometer
@@ -43,4 +35,3 @@ List of notebooks from [Wearipedia.com](http://wearipedia.com).
 #### Databases
 * Google Fit
 * Strava
-* Health Kit
