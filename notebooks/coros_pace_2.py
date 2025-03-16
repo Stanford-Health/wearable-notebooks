@@ -7,8 +7,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
+#     display_name: Python 3
 #     name: python3
 # ---
 
@@ -134,7 +133,7 @@ from scipy.ndimage import gaussian_filter
 # + id="dndgwUe3Xjpp"
 
 #@title Enter Coros login credentials
-email_address = "stefren97@gmail.com" #@param {type:"string"}
+email_address = "joedoe@gmail.com" #@param {type:"string"}
 password = "Stanfordcoros" #@param {type:"string"}
 
 # + [markdown] id="TNy1h9EVWbCi"

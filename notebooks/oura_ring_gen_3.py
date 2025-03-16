@@ -144,8 +144,8 @@
 # pip install requests matplotlib numpy scipy seaborn pandas
 
 # Relevant libraries are imported below.
-# !pip3.11 uninstall -y wearipedia
-# !pip3.11 install git+https://github.com/stefren/wearipedia@oura-ring-v2-update
+# # !pip3.11 uninstall -y wearipedia
+# # !pip3.11 install git+https://github.com/stefren/wearipedia@oura-ring-v2-update
 
 import wearipedia
 import requests
@@ -269,7 +269,7 @@ variables["oauth_access_token"] = token
 #@title Insert personal access token
 
 token = "" #@param {type:"string"}
-variables["personal_access_token"] = ""
+variables["personal_access_token"] = "KPTC7STRLBTZZW3R24ZYSE4KUNYJFYYK" # TODO REMOVE
 
 # + [markdown] id="ATcqnTjidMOm"
 # # 3. Data Extraction
@@ -289,14 +289,14 @@ variables["personal_access_token"] = ""
 
 # + id="V3WrA_yydLfz"
 #@title You can change these parameters
-START_DATE = "2022-03-01" #@param {type:"string"}
-END_DATE = "2022-03-30" #@param {type:"string"}
+START_DATE = "2025-01-01" #@param {type:"string"}
+END_DATE = "2025-01-31" #@param {type:"string"}
 
 # change key to "personal_access_token" if using PAT
 TOCKEN_TYPE = "personal_access_token" #@param {type:"string"}
 ACCESS_TOKEN = variables[TOCKEN_TYPE]
 
-synthetic = True #@param {type:"boolean"}
+synthetic = False #@param {type:"boolean"}
 
 # + id="QTcYXd7oC44R"
 device = wearipedia.get_device("oura/oura_ring3")  # Initialize the device object for the Oura Ring 3
@@ -324,6 +324,7 @@ api_data['daily_activity'] = daily_activity
 api_data['ideal_sleep_time'] = ideal_bedtime
 api_data['readiness'] = readiness
 api_data['heart_rate'] = heart_rate
+
 
 # + [markdown] id="fsla-jD9whZs"
 # # 4. Data Exporting
@@ -452,9 +453,7 @@ if not detect_adherence_only:
 # + colab={"base_uri": "https://localhost:8080/", "height": 458} id="pvD0jpJIlSLS" outputId="56cf9520-7f38-49e2-bd3c-7e01338d7f44"
 arr1 = []
 arr2 = []
-print(api_data)
 for metric in api_data["daily_activity"]:
-    print(metric)
     arr1.append(metric['day'])
     arr2.append(metric['non_wear_time'])
 

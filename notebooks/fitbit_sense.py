@@ -7,7 +7,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: Python 3.8.16 64-bit ('3.8.16')
 #     language: python
 #     name: python3
 # ---
@@ -139,7 +139,7 @@
 # ## 1.2 Library imports
 
 # + colab={"base_uri": "https://localhost:8080/"} id="o4Wj4rtt1GLD" outputId="c2733541-8484-45bd-a4cc-2e643230be4a"
-# !pip3.11 install git+https://github.com/stefren/wearipedia@fitbit-updates
+# !pip install git+https://github.com/M7-Soliman/wearipedia
 
 import wearipedia
 

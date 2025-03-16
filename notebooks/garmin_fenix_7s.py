@@ -7,7 +7,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
@@ -103,8 +103,8 @@
 #
 
 # + colab={"base_uri": "https://localhost:8080/"} id="CJ1vphyVbESM" outputId="f0e0d259-d96d-4dbc-dd84-7dccf0c31d30"
-# !pip3.11 install --no-cache-dir git+https://github.com/a-llison-lau/wearipedia.git
-# !pip3.11 install garth
+# !pip install --no-cache-dir git+https://github.com/a-llison-lau/wearipedia.git
+# !pip install garth
 import wearipedia
 
 # + [markdown] id="pH_pFeIIFUjP"

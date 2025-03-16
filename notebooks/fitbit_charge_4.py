@@ -7,7 +7,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: Python 3.8.16 64-bit ('3.8.16')
 #     language: python
 #     name: python3
 # ---
@@ -119,7 +119,7 @@
 # #1.2 Library imports
 
 # + colab={"base_uri": "https://localhost:8080/"} id="uuVAYBKuiSNj" outputId="bb56988a-dd7f-4421-a0dd-c76dd8d0cfa8"
-# !pip3.11 install git+https://github.com/stefren/wearipedia@fitbit-updates
+# !pip install git+https://github.com/M7-Soliman/wearipedia
 
 import wearipedia
 
@@ -194,7 +194,7 @@ code_challenge = base64.urlsafe_b64encode(
 # + id="aSAyLijH5dFI"
 #@title Insert client_id and client_secret
 
-client_id = "23Q3WK" #@param {type:"string"}
+client_id = "23RR9L" #@param {type:"string"}
 client_secret = "e6f057eafac9b9343872d7066b3843dd" #@param {type:"string"}
 
 # + id="ZCQcV79GSslI"
@@ -254,7 +254,7 @@ for i in variables.items():
 # + colab={"base_uri": "https://localhost:8080/"} id="3kJdWgMtb7F1" outputId="a92c418a-4793-4202-a645-00a4a5bbe526"
 # combine all parameters into the url string
 url = "https://www.fitbit.com/oauth2/authorize"  # authorization endpoint
-for key in ["client_id", "code_challenge", "code_challenge_method", "scope", "response_type", "expires_in"]:
+for key in ["client_id", "redirect_uri", "code_challenge", "code_challenge_method", "scope", "response_type", "expires_in"]:
     if url == "https://www.fitbit.com/oauth2/authorize":
         url += "?" + key + "=" + variables[key]
     else:

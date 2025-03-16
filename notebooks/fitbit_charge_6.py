@@ -7,8 +7,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
+#     display_name: Python 3
 #     name: python3
 # ---
 
@@ -98,7 +97,7 @@
 # Now that we have the Fitbit and application setup, we can start using wearipedia to extract and simulate data. We will start by importing `wearipedia` itself.
 
 # + colab={"base_uri": "https://localhost:8080/"} id="KmeBDcKDDW_f" outputId="67753c51-a4f4-451d-bbcb-dc344cd52860"
-# # !pip3.11 install git+https://github.com/stefren/wearipedia@fitbit-updates
+# !pip install --no-cache-dir git+https://github.com/a-llison-lau/wearipedia
 import wearipedia
 
 # + [markdown] id="fExIpAE3OjbV"
@@ -129,8 +128,8 @@ import numpy as np
 # + id="QIuaj_F_SaSW"
 #@title Insert client_id and client_secret
 
-CLIENT_ID = "23Q3WK" #@param {type:"string"}
-CLIENT_SECRET = "4ed2de2da7157c5fbaeadff8e785285d" #@param {type:"string"}
+CLIENT_ID = "23PHL9" #@param {type:"string"}
+CLIENT_SECRET = "8232f85x1999x899xx999fbe12xx999" #@param {type:"string"}
 auth_creds = {"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET}
 
 # + [markdown] id="VBKfg77USmmx"
@@ -139,9 +138,9 @@ auth_creds = {"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET}
 # + id="2eNx1aBOTDFJ"
 #@title Enter start date and end data for data extraction/simulation
 
-START_DATE = "2024-11-01" #@param {type:"string"}
-END_DATE = "2024-11-30" #@param {type:"string"}
-params = {"seed": 100, "start_date": START_DATE, "end_date": END_DATE, "single_date": "2024-11-10"}
+START_DATE = "2024-01-01" #@param {type:"string"}
+END_DATE = "2024-01-30" #@param {type:"string"}
+params = {"seed": 100, "start_date": START_DATE, "end_date": END_DATE}
 
 # + [markdown] id="g9aT8ziSTLEA"
 # Now, we will initialize the device object for the Fitbit Charge 6. We will also specify if we will use real data. Check the box if you would like to use synthetic data instead of real data.
@@ -156,7 +155,7 @@ params = {"seed": 100, "start_date": START_DATE, "end_date": END_DATE, "single_d
 # + id="JY3xEIOsF3MS"
 device = wearipedia.get_device("fitbit/fitbit_charge_6")
 
-synthetic = False #@param {type:"boolean"}
+synthetic = True #@param {type:"boolean"}
 if not synthetic:
   # If the data is not synthetic, authenticate using the access token
   device.authenticate(auth_creds)
@@ -171,7 +170,7 @@ if not synthetic:
 # + id="YDkjW7BJGLyQ"
 br = device.get_data("intraday_breath_rate", params)
 azm = device.get_data("intraday_active_zone_minute", params)
-# activity = device.get_data("intraday_activity", params)
+activity = device.get_data("intraday_activity", params)
 hr = device.get_data("intraday_heart_rate", params)
 hrv = device.get_data("intraday_hrv", params)
 spo2 = device.get_data("intraday_spo2", params)
@@ -179,7 +178,7 @@ spo2 = device.get_data("intraday_spo2", params)
 # + [markdown] id="O2Q47VdvXDIA"
 # Let's take a look at the data that is extracted! As an example, the active zone minute (azm) has the following format. Other data types also follow a similar dictionary format.
 
-# + colab={"base_uri": "https://localhost:8080/"} id="PC_DBqw8GOgA" outputId="fbbb51a2-70fc-4530-83ff-3ae300110932"
+# + id="PC_DBqw8GOgA" colab={"base_uri": "https://localhost:8080/"} outputId="fbbb51a2-70fc-4530-83ff-3ae300110932"
 azm
 
 # + [markdown] id="_Z5B8M5w50Aw"
@@ -282,7 +281,7 @@ for record in hr:
 df = pd.DataFrame(results, columns=["datetime", "heart_rate"])
 df['datetime'] = pd.to_datetime(df['datetime'])
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 424} id="hWUHqR0b2GyV" outputId="d3f4ace3-c4f6-4b7c-fb0b-0c149b28e2de"
+# + id="hWUHqR0b2GyV" colab={"base_uri": "https://localhost:8080/", "height": 424} outputId="d3f4ace3-c4f6-4b7c-fb0b-0c149b28e2de"
 df
 
 # + [markdown] id="c0FgPHlH_2wJ"
@@ -353,7 +352,7 @@ non_adherence_df.columns = ['datetime', 'heart_rate']
 #
 # To plot the block plot, we plot a value of 1 if a valid heart rate value is recorded. Otherwise, we plot a value of 0.
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 573} id="-Wu7ou6NHKmK" outputId="96d7c008-d518-4c4b-d4fe-429a09297aca"
+# + id="-Wu7ou6NHKmK" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="96d7c008-d518-4c4b-d4fe-429a09297aca"
 VISUAL_START_DATE = "2024-01-17" #@param {type:"string"}
 VISUAL_END_DATE = "2024-01-19" #@param {type:"string"}
 
@@ -441,7 +440,7 @@ spo2_df['minute'] = pd.to_datetime(spo2_df['minute'])
 #
 # Here, you can specify the visualization start date and end date.
 
-# + id="l3OMe3_8AU9Q" jupyter={"outputs_hidden": true}
+# + id="l3OMe3_8AU9Q"
 VISUALIZATION_START_DATE = "2024-01-10" #@param {type:"string"}
 VISUALIZATION_END_DATE = "2024-01-17" #@param {type:"string"}
 
@@ -455,7 +454,7 @@ selected_rmssd_df = rmssd_df[(rmssd_df['minute'] >= visualization_start_date) & 
 selected_lf_hf_df = lf_hf_df[(lf_hf_df['minute'] >= visualization_start_date) & (lf_hf_df['minute'] < visualization_end_date)]
 selected_spo2_df = spo2_df[(spo2_df['minute'] >= visualization_start_date) & (spo2_df['minute'] < visualization_end_date)]
 
-# + cellView="form" colab={"base_uri": "https://localhost:8080/", "height": 573} id="yPPBIC8HKpwo" outputId="19db5f64-e718-42a0-afd6-9a33cb2ac912"
+# + id="yPPBIC8HKpwo" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="19db5f64-e718-42a0-afd6-9a33cb2ac912" cellView="form"
 #@title Select the data to plot
 
 feature = "hrv (lf and hf)" #@param ["heart rate", "breathing rate", "hrv (rmssd)", "hrv (lf and hf)", "spo2"]
@@ -548,7 +547,7 @@ specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00', '23:59:00']
 
 time_stamps = [pd.to_datetime(f"{DAY} {time}") for time in specific_times]
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 564} id="T5SH5nYZLWAg" outputId="d0b00839-16c8-44d6-a124-f1c00d3d0be3"
+# + id="T5SH5nYZLWAg" colab={"base_uri": "https://localhost:8080/", "height": 564} outputId="d0b00839-16c8-44d6-a124-f1c00d3d0be3"
 with plt.style.context('dark_background'):
     # Creating the plot
     fig, ax = plt.subplots()
@@ -702,7 +701,7 @@ day_hr_df_copy['hr_diff'] = day_hr_df['heart_rate'].diff()
 day_hr_df = day_hr_df_copy
 
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 424} id="IWvO-RZlqOPw" jupyter={"outputs_hidden": true} outputId="06b16029-1445-468b-a279-31b59c684fd3"
+# + id="IWvO-RZlqOPw" colab={"base_uri": "https://localhost:8080/", "height": 424} outputId="06b16029-1445-468b-a279-31b59c684fd3"
 day_hr_df
 
 # + [markdown] id="aA_ZA_0OoTN9"
@@ -710,7 +709,7 @@ day_hr_df
 #
 # The threshold is calculated by multiplying the standard deviation of the BPM differences by a factor. This factor is chosen to capture the most extreme variations, which are less probable to occur naturally.
 
-# + colab={"base_uri": "https://localhost:8080/"} id="4NjC3jwKnr6s" outputId="c7c0c6b1-d653-4c0a-8ad0-041737452bb4"
+# + id="4NjC3jwKnr6s" colab={"base_uri": "https://localhost:8080/"} outputId="c7c0c6b1-d653-4c0a-8ad0-041737452bb4"
 # Calculate the standard deviation and mean of the differences
 mean_diff = day_hr_df["hr_diff"].mean()
 std_diff = day_hr_df["hr_diff"].std()
@@ -733,7 +732,7 @@ conditional_outliers = day_hr_df[abs(day_hr_df['hr_diff']) > threshold]
 #
 # Visualization is crucial as it provides an immediate sense of where outliers occur in the dataset, offering insights into their potential causes and implications.
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 573} id="igmiiB0Zoqvy" outputId="5c05c970-46f4-4b39-86c5-810cb43a1a47"
+# + id="igmiiB0Zoqvy" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="5c05c970-46f4-4b39-86c5-810cb43a1a47"
 # Plot HRV data with conditional outliers highlighted
 plt.figure(figsize=(10, 6))
 plt.plot(day_hr_df['heart_rate'], label='heart rate data', alpha=0.7)
@@ -798,7 +797,7 @@ for i in apnea_indices:
 # #### Step 3: Visualize the data
 #
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 704} id="2CG8WIPEUG4k" outputId="e8699d1b-48a9-4f1d-d009-99114618bb53"
+# + id="2CG8WIPEUG4k" colab={"base_uri": "https://localhost:8080/", "height": 704} outputId="e8699d1b-48a9-4f1d-d009-99114618bb53"
 import seaborn as sns
 sns.set(style="whitegrid")
 
