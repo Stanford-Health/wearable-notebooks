@@ -238,7 +238,7 @@ def call_API(
 # %% colab={"base_uri": "https://localhost:8080/"} id="65nPJGWGGEF-" outputId="c5ae3da4-4dcd-494a-efc5-1f034dcb1357"
 # calls user profile
 call_API(
-    access_token=variables["access_token"],
+    access_token=access_token,
     url="https://api.fitbit.com/1/user/-/profile.json")
 
 # %% [markdown] id="GCoEb3ZcwCov"
