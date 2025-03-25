@@ -218,6 +218,9 @@ if not synthetic:
 # %% [markdown] id="uFNEPwuzF3Q9"
 # ## 2.3 Calling the API
 
+# %% [markdown] id="q6K2MJSGGkCH"
+# If you'd like to call the API endpoints directly, you can authorize with an header as shown below.
+
 # %% id="ZIJRSBhRGBUF"
 # executes a GET request on the API
 def call_API(
