@@ -3,23 +3,24 @@
 #   jupytext:
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
+#     language: python
 #     name: python3
 # ---
 
-# + [markdown] id="JqgX4MYtGuDF"
+# %% [markdown] id="JqgX4MYtGuDF"
 # # Fitbit Charge 6: Guide to data extraction and analysis
 
-# + [markdown] id="HOCO7bMFIgrP"
+# %% [markdown] id="HOCO7bMFIgrP"
 # <img src="https://imgur.com/nR08yax.png" width="300">
 #
 # _A picture of the Fitbit Charge 6 that was used for this notebook_
 
-# + [markdown] id="ofW3O4rMJKvI"
+# %% [markdown] id="ofW3O4rMJKvI"
 # The Fitbit Charge 6 is a new version of the Fitbit Charge series. We have covered the data extraction and analysis for the Fitbit Charge 4 in [this notebook](https://github.com/Stanford-Health/wearable-notebooks/blob/main/notebooks/fitbit_charge_4.ipynb), and you can extract any data that you can extract from the Fitbit Charge 4, also from the Fitbit Charge 6!
 #
 # What we will be covering in this notebook will be **intraday** data specifically. Here is a list of high frequency data that can be extracted from any Fitbit watch.
@@ -60,7 +61,7 @@
 #
 # *Note: Full documentation of APIs by Fitbit can be found [here](https://dev.fitbit.com/build/reference).
 
-# + [markdown] id="wjmrdIMbMyIb"
+# %% [markdown] id="wjmrdIMbMyIb"
 # # 1. Setup
 # ## 1.1 Data Receiver Setup
 #
@@ -96,14 +97,13 @@
 #
 # Now that we have the Fitbit and application setup, we can start using wearipedia to extract and simulate data. We will start by importing `wearipedia` itself.
 
-# + colab={"base_uri": "https://localhost:8080/"} id="KmeBDcKDDW_f" outputId="67753c51-a4f4-451d-bbcb-dc344cd52860"
-# !pip install --no-cache-dir git+https://github.com/a-llison-lau/wearipedia
+# %% colab={"base_uri": "https://localhost:8080/"} id="KmeBDcKDDW_f" outputId="67753c51-a4f4-451d-bbcb-dc344cd52860"
 import wearipedia
 
-# + [markdown] id="fExIpAE3OjbV"
+# %% [markdown] id="fExIpAE3OjbV"
 # Next, we will import all other necessary libraries. These include `matplotlib` for graph plotting, `pandas`, `numpy`, `scipy` for data processing and statistical analysis.
 
-# + id="3Xon7tWfG0Jc"
+# %% id="3Xon7tWfG0Jc"
 import base64
 import hashlib
 import html
@@ -120,29 +120,29 @@ from scipy import stats
 from scipy.ndimage import gaussian_filter
 import numpy as np
 
-# + [markdown] id="iew5gUfjSHHc"
+# %% [markdown] id="iew5gUfjSHHc"
 # # 2. Authentication and Authorization
 #
-# In this section, we will cover user authentication with `wearipedia`. First you will need your client id and client secret from section 1.1.
+# In this section, we will cover user authentication with `wearipedia`. You will need your client id and client secret from section 1.1.
 
-# + id="QIuaj_F_SaSW"
+# %% id="QIuaj_F_SaSW"
 #@title Insert client_id and client_secret
 
-CLIENT_ID = "23PHL9" #@param {type:"string"}
-CLIENT_SECRET = "8232f85x1999x899xx999fbe12xx999" #@param {type:"string"}
-auth_creds = {"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET}
+CLIENT_ID = "" #@param {type:"string"}
+CLIENT_SECRET = "" #@param {type:"string"}
+access_token = ""
 
-# + [markdown] id="VBKfg77USmmx"
+# %% [markdown] id="VBKfg77USmmx"
 # Next, you can specify the start date and end date of the data that you would like to extract (or simulate).
 
-# + id="2eNx1aBOTDFJ"
+# %% id="2eNx1aBOTDFJ"
 #@title Enter start date and end data for data extraction/simulation
 
-START_DATE = "2024-01-01" #@param {type:"string"}
-END_DATE = "2024-01-30" #@param {type:"string"}
+START_DATE = "2024-12-01" #@param {type:"string"}
+END_DATE = "2024-12-10" #@param {type:"string"}
 params = {"seed": 100, "start_date": START_DATE, "end_date": END_DATE}
 
-# + [markdown] id="g9aT8ziSTLEA"
+# %% [markdown] id="g9aT8ziSTLEA"
 # Now, we will initialize the device object for the Fitbit Charge 6. We will also specify if we will use real data. Check the box if you would like to use synthetic data instead of real data.
 #
 # *If you choose to use real data*, running the cell below should prompt you to click on an url. This will redirect you to your redirect url that you have chosen when you registered for an app. Please check all boxes to access all available data. Afterwards, copy the url in the address bar and paste in the box below.
@@ -152,22 +152,24 @@ params = {"seed": 100, "start_date": START_DATE, "end_date": END_DATE}
 #
 #
 
-# + id="JY3xEIOsF3MS"
+# %% id="JY3xEIOsF3MS"
 device = wearipedia.get_device("fitbit/fitbit_charge_6")
 
-synthetic = True #@param {type:"boolean"}
+synthetic = False #@param {type:"boolean"}
 if not synthetic:
   # If the data is not synthetic, authenticate using the access token
-  device.authenticate(auth_creds)
+  device.authenticate(access_token)
 
-# + [markdown] id="wRQ1S6WWUzK_"
+# %% [markdown] id="wRQ1S6WWUzK_"
 # # 3. Data Extraction
 #
 # Now we are ready to extract data from the Fitbit device. To extract data, simply call the `get_data` function with the data type you would like to extract. The types of intraday data available are `"intraday_breath_rate"`, `"intraday_active_zone_minute"`, `"intraday_activity"`, `"heart_rate"`, `"intraday_hrv"` and `"intraday_spo2"`.
 #
-# Since intraday data is high frequency data, there is a lot of data to be extracted/generated. It should take a while for the data to be retreived.
+# Since intraday data is high frequency data, there is a lot of data to be extracted/generated. It should take a while for the data to be retrieved.
+#
+# Note also that the Fitbit API has a limit of 150 requests per user per hour, and each day of intraday data requires one API request. It might be prudent to export the data soon after it's fetched. Note that this also means you can at one time export at most 150 days of data. If the API is returning a 429 code, this means that you've run out of requests for the hour.
 
-# + id="YDkjW7BJGLyQ"
+# %% id="YDkjW7BJGLyQ"
 br = device.get_data("intraday_breath_rate", params)
 azm = device.get_data("intraday_active_zone_minute", params)
 activity = device.get_data("intraday_activity", params)
@@ -175,35 +177,35 @@ hr = device.get_data("intraday_heart_rate", params)
 hrv = device.get_data("intraday_hrv", params)
 spo2 = device.get_data("intraday_spo2", params)
 
-# + [markdown] id="O2Q47VdvXDIA"
-# Let's take a look at the data that is extracted! As an example, the active zone minute (azm) has the following format. Other data types also follow a similar dictionary format.
+# %% [markdown] id="O2Q47VdvXDIA"
+# <!-- Let's take a look at the data that is extracted! As an example, the active zone minute (azm) has the following format. Other data types also follow a similar dictionary format. -->
 
-# + id="PC_DBqw8GOgA" colab={"base_uri": "https://localhost:8080/"} outputId="fbbb51a2-70fc-4530-83ff-3ae300110932"
+# %% id="PC_DBqw8GOgA" colab={"base_uri": "https://localhost:8080/"} outputId="fbbb51a2-70fc-4530-83ff-3ae300110932"
 azm
 
-# + [markdown] id="_Z5B8M5w50Aw"
+# %% [markdown] id="_Z5B8M5w50Aw"
 # At first glance, we can see that this dictionary contains some information about cardio active zone minutes, active zone minutes, and their corresponding recorded time during the day. Each minute, the fitbit determines if the user is in fat burn, cardio, or peak heart rate zone, and convert it into "active zone minutes". activeZoneMinutes is simply a total count of active zone minutes earned. For more information, you can refer to the fitbit web API [active zone minute endpoint description](https://dev.fitbit.com/build/reference/web-api/intraday/get-azm-intraday-by-date/).
 #
 # Although the data looks a bit messy, it is important to understand the structure of the extracted data so that we can reorganize it into a format we want (we will demonstrate organizing the data into dataframes in upcoming sections).
 
-# + colab={"base_uri": "https://localhost:8080/"} id="Cl63vZV352bm" outputId="df2d7cfa-e5e7-4585-b0ba-6045fc91b021"
+# %% colab={"base_uri": "https://localhost:8080/"} id="Cl63vZV352bm" outputId="df2d7cfa-e5e7-4585-b0ba-6045fc91b021"
 print(f"Number of days with azm recorded: {len(azm)}")
 
-# + colab={"base_uri": "https://localhost:8080/"} id="ts4iCSAN8Imi" outputId="38f74a49-0d68-47ef-d6c8-ae37c8d31b87"
+# %% colab={"base_uri": "https://localhost:8080/"} id="ts4iCSAN8Imi" outputId="38f74a49-0d68-47ef-d6c8-ae37c8d31b87"
 # For the i-th day, the dictionary containing the AZM data can be access via azm[i]['activities-active-zone-minutes-intraday'][0]
 # Let's look at the data for the first day!
 
 azm[0]['activities-active-zone-minutes-intraday'][0]
 
-# + [markdown] id="fB__dYEp_48E"
+# %% [markdown] id="fB__dYEp_48E"
 # The above dictionary has two keys -- `'dateTime'` and `'minutes'`. `'dateTime'` contains the date of the AZM data, and `'minutes'` is a list of dictionaries, each containing the AZM information and the minute during the daya at which it was recorded.
 
-# + [markdown] id="OcClr8tMXHz4"
+# %% [markdown] id="OcClr8tMXHz4"
 # # 4. Data Exporting
 #
 # In this section, we export all of this data to JSON, which with popular scientific computing software (R, Matlab). We export each datatype separately and also export a complete version that includes all simultaneously.
 
-# + cellView="form" id="_8EsdRzSXCvg"
+# %% cellView="form" id="_8EsdRzSXCvg"
 import json
 
 #@title Select which format to export data
@@ -252,19 +254,19 @@ if use_Excel:
   pd.DataFrame(spo2).to_excel("spo2.xlsx", index=False)
 
 
-# + [markdown] id="0JtuU63rxRZX"
+# %% [markdown] id="0JtuU63rxRZX"
 # # 5. Data Adherence
 #
 # In this section, we will simulate non-adherence over long periods of time. We will demonstrate this with the heart rate data. First, we will have to extract the time and corresponding heart rate value from our raw json format.
 
-# + id="WvzvbEn0yLjF"
+# %% id="WvzvbEn0yLjF"
 from datetime import datetime
 
 results = []
 
 for record in hr:
-    date_str = record["heart_rate_day"][0]["activities-heart"][0]["dateTime"]
-    dataset = record["heart_rate_day"][0]["activities-heart-intraday"]["dataset"]
+    date_str = record["activities-heart"][0]["dateTime"]
+    dataset = record["activities-heart-intraday"]["dataset"]
 
     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
 
@@ -277,27 +279,26 @@ for record in hr:
         date_time = datetime.combine(date_obj, time_obj)
 
         results.append([date_time, heart_rate_value])
-
 df = pd.DataFrame(results, columns=["datetime", "heart_rate"])
 df['datetime'] = pd.to_datetime(df['datetime'])
 
-# + id="hWUHqR0b2GyV" colab={"base_uri": "https://localhost:8080/", "height": 424} outputId="d3f4ace3-c4f6-4b7c-fb0b-0c149b28e2de"
-df
+# %% id="hWUHqR0b2GyV" colab={"base_uri": "https://localhost:8080/", "height": 424} outputId="d3f4ace3-c4f6-4b7c-fb0b-0c149b28e2de"
+print(df)
 
-# + [markdown] id="c0FgPHlH_2wJ"
+# %% [markdown] id="c0FgPHlH_2wJ"
 # Since our simulated data has data entries for all timesteps, in order to simulate non-adherence, we will randomly select a portion of data to be None. We will first select 30% of the dates among all dates in the dataframe on which non-adherence occurs.
 
-# + id="qx7VGb112sZ9"
+# %% id="qx7VGb112sZ9"
 seed_value = 42
 np.random.seed(seed_value)
 
 unique_dates = df['datetime'].dt.date.unique()
 selected_dates = np.random.choice(unique_dates, size=int(len(unique_dates) * 0.3), replace=False)
 
-# + [markdown] id="c1sK0Vjx6s1_"
+# %% [markdown] id="c1sK0Vjx6s1_"
 # In order for the nonadherence to be realistic, we will select random intervals that are hours long where there is no data recorded -- instead of random entries -- to be `None` (after all, the user won't take of the watch for one second and put on the watch another second!).
 
-# + id="KFeosZau7ueu"
+# %% id="KFeosZau7ueu"
 import random
 
 random.seed(seed_value)
@@ -320,22 +321,22 @@ def create_random_intervals(date):
     return intervals
 
 
-# + id="6T5P1NsL70Nu"
+# %% id="6T5P1NsL70Nu"
 intervals_to_nullify = []
 for date in selected_dates:
     intervals_to_nullify.extend(create_random_intervals(date))
 
 intervals_to_nullify = [(pd.Timestamp(start), pd.Timestamp(end)) for start, end in intervals_to_nullify]
 
-# + [markdown] id="qJsBPaPv76RO"
+# %% [markdown] id="qJsBPaPv76RO"
 # Since in the real data, the fitbit doesn't record when the user is not using the watch, in our synthetic we will delete those rows which have value `None`.
 
-# + id="cijbizZaHwgu"
+# %% id="cijbizZaHwgu"
 non_adherence_df = df.copy()
 for start_time, end_time in intervals_to_nullify:
     non_adherence_df = non_adherence_df[(non_adherence_df['datetime'] < start_time) | (non_adherence_df['datetime'] > end_time)]
 
-# + id="v6IQSUuVt7x1"
+# %% id="v6IQSUuVt7x1"
 date_range = pd.date_range(start=START_DATE, end=END_DATE + " 23:59:59", freq='S')
 
 # Reindex non_adherence_df using the complete date range
@@ -347,14 +348,14 @@ non_adherence_df['heart_rate'] = non_adherence_df['heart_rate'].apply(lambda x: 
 # Reset column names if needed
 non_adherence_df.columns = ['datetime', 'heart_rate']
 
-# + [markdown] id="W1vS6lKmGtMT"
+# %% [markdown] id="W1vS6lKmGtMT"
 # Next, we can specify the start date and end date to visualize. We will also plot a block plot to visualize the dates and times of when the user had used the watch.
 #
 # To plot the block plot, we plot a value of 1 if a valid heart rate value is recorded. Otherwise, we plot a value of 0.
 
-# + id="-Wu7ou6NHKmK" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="96d7c008-d518-4c4b-d4fe-429a09297aca"
-VISUAL_START_DATE = "2024-01-17" #@param {type:"string"}
-VISUAL_END_DATE = "2024-01-19" #@param {type:"string"}
+# %% id="-Wu7ou6NHKmK" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="96d7c008-d518-4c4b-d4fe-429a09297aca"
+VISUAL_START_DATE = "2024-12-01" #@param {type:"string"}
+VISUAL_END_DATE = "2024-12-30" #@param {type:"string"}
 
 visual_start_date = pd.to_datetime(VISUAL_START_DATE)
 visual_end_date = pd.to_datetime(VISUAL_END_DATE)
@@ -375,14 +376,14 @@ plt.ylabel('Heart Rate (1: Present, 0: NaN)')
 plt.grid(True)
 plt.show()
 
-# + [markdown] id="jpkiE-K2_Zih"
+# %% [markdown] id="jpkiE-K2_Zih"
 # # 6. Visualization
 #
 # In this section, we will be visualizing our three kinds of data in a simple, customizable plot! This plot is intended to provide a starter example for plotting, whereas later examples emphasize deep control and aesthetics.
 #
 # Similar to the previous section, we would first have to reorganize our raw JSON format data.
 
-# + id="t4ZMA92v99UN"
+# %% id="t4ZMA92v99UN"
 # Reorganize heart rate data
 hr_df = df.copy()
 
@@ -430,7 +431,7 @@ for entry in spo2:
 spo2_df = pd.DataFrame(minute_value_data)
 spo2_df['minute'] = pd.to_datetime(spo2_df['minute'])
 
-# + [markdown] id="CfnB5qggJXy7"
+# %% [markdown] id="CfnB5qggJXy7"
 # We will plot graphs to visualize the following data:
 # - Heart rate (per second)
 # - Heart rate variability (hrv) in terms of Root Mean Square of Successive Differences (RMSSD)
@@ -440,21 +441,21 @@ spo2_df['minute'] = pd.to_datetime(spo2_df['minute'])
 #
 # Here, you can specify the visualization start date and end date.
 
-# + id="l3OMe3_8AU9Q"
-VISUALIZATION_START_DATE = "2024-01-10" #@param {type:"string"}
-VISUALIZATION_END_DATE = "2024-01-17" #@param {type:"string"}
+# %% id="l3OMe3_8AU9Q"
+VISUALIZATION_START_DATE = "2024-12-01" #@param {type:"string"}
+VISUALIZATION_END_DATE = "2024-12-08" #@param {type:"string"}
 
 visualization_start_date = pd.to_datetime(VISUALIZATION_START_DATE)
 visualization_end_date = pd.to_datetime(VISUALIZATION_END_DATE)
 
-# + id="6QclYBE4AVk7"
+# %% id="6QclYBE4AVk7"
 selected_hr_df = hr_df[(hr_df['datetime'] >= visualization_start_date) & (hr_df['datetime'] < visualization_end_date)]
 selected_br_df = br_df[(br_df['datetime'] >= visualization_start_date) & (br_df['datetime'] < visualization_end_date)]
 selected_rmssd_df = rmssd_df[(rmssd_df['minute'] >= visualization_start_date) & (rmssd_df['minute'] < visualization_end_date)]
 selected_lf_hf_df = lf_hf_df[(lf_hf_df['minute'] >= visualization_start_date) & (lf_hf_df['minute'] < visualization_end_date)]
 selected_spo2_df = spo2_df[(spo2_df['minute'] >= visualization_start_date) & (spo2_df['minute'] < visualization_end_date)]
 
-# + id="yPPBIC8HKpwo" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="19db5f64-e718-42a0-afd6-9a33cb2ac912" cellView="form"
+# %% id="yPPBIC8HKpwo" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="19db5f64-e718-42a0-afd6-9a33cb2ac912" cellView="form"
 #@title Select the data to plot
 
 feature = "hrv (lf and hf)" #@param ["heart rate", "breathing rate", "hrv (rmssd)", "hrv (lf and hf)", "spo2"]
@@ -521,7 +522,7 @@ else:
 
 
 
-# + [markdown] id="QXGeE9HDSW38"
+# %% [markdown] id="QXGeE9HDSW38"
 # # 7. Advanced Visualization
 #
 # In this section, we will try more advanced data visualization, by replicating some plots from the fitbit. This will more manual adjustments for positioning texts, customizing colors, etc.
@@ -532,10 +533,10 @@ else:
 #
 # <img src="https://imgur.com/Goz1UD2.png" width="300">
 
-# + id="7_tumXHMKXND"
+# %% id="7_tumXHMKXND"
 from datetime import timedelta
 
-DAY = "2024-01-20"
+DAY = "2024-12-03"
 vis_day = pd.to_datetime(DAY)
 vis_end_day = vis_day + timedelta(days = 1)
 DAY_hr_df = hr_df[(hr_df['datetime'] >= vis_day) & (hr_df['datetime'] < vis_end_day)]
@@ -547,7 +548,7 @@ specific_times = ['00:00:00', '06:00:00', '12:00:00', '18:00:00', '23:59:00']
 
 time_stamps = [pd.to_datetime(f"{DAY} {time}") for time in specific_times]
 
-# + id="T5SH5nYZLWAg" colab={"base_uri": "https://localhost:8080/", "height": 564} outputId="d0b00839-16c8-44d6-a124-f1c00d3d0be3"
+# %% id="T5SH5nYZLWAg" colab={"base_uri": "https://localhost:8080/", "height": 564} outputId="d0b00839-16c8-44d6-a124-f1c00d3d0be3"
 with plt.style.context('dark_background'):
     # Creating the plot
     fig, ax = plt.subplots()
@@ -572,7 +573,7 @@ with plt.style.context('dark_background'):
     plt.tick_params(axis='y', labelsize=8)
 
     # Adding labels
-    plt.figtext(0.5, 1.0, "Jan 20, 2024", fontsize=14, ha='center', color='w')
+    plt.figtext(0.5, 1.0, "Dec 30, 2024", fontsize=14, ha='center', color='w')
     plt.figtext(0.5, 0.96, 'Beats Per Minute', fontsize=14, ha='center', color='w', fontweight='bold')
 
     for i in range(len(DAY_hr_df) - 1):
@@ -605,7 +606,7 @@ with plt.style.context('dark_background'):
 
     plt.show()
 
-# + [markdown] id="28lf9pkpT1Av"
+# %% [markdown] id="28lf9pkpT1Av"
 # # 8. Outlier Detection and Data Cleaning
 #
 # In data analysis, outliers are data points that significantly differ from the rest. They might indicate measurement variability or errors. For BPM data, outliers could signal physiological anomalies, errors, or artifacts.
@@ -663,10 +664,10 @@ with plt.style.context('dark_background'):
 #
 # Since our synthetic data resembles a health adult, we would have to inject some anomalies to the data.
 
-# + id="IGMU7rZcss7e"
+# %% id="IGMU7rZcss7e"
 from datetime import timedelta
 
-VIS_START_DATE = "2024-01-18" #@param {type:"string"}
+VIS_START_DATE = "2024-12-03" #@param {type:"string"}
 vis_start_date = pd.to_datetime(VIS_START_DATE)
 vis_end_date = vis_start_date + timedelta(days = 1)
 day_hr_df = hr_df[(hr_df['datetime'] >= vis_start_date) & (hr_df['datetime'] < vis_end_date)]
@@ -685,12 +686,12 @@ sampled_rows['heart_rate'] = np.random.choice(heart_rate_values, size=sample_siz
 day_hr_df.loc[sampled_rows.index, 'heart_rate'] = sampled_rows['heart_rate']
 
 
-# + [markdown] id="edMRD548sZup"
+# %% [markdown] id="edMRD548sZup"
 # #### Step 2: Calculate the Differences Between Consecutive Measurements
 #
 # Second, we will calculate the differences between consecutive measurements. Since we have quite a lot of data, we will demonstrate this outlier detection with just one day of data.
 
-# + id="J6mK1EBDOijS"
+# %% id="J6mK1EBDOijS"
 # Create a copy of the DataFrame
 day_hr_df_copy = day_hr_df.copy()
 
@@ -701,15 +702,15 @@ day_hr_df_copy['hr_diff'] = day_hr_df['heart_rate'].diff()
 day_hr_df = day_hr_df_copy
 
 
-# + id="IWvO-RZlqOPw" colab={"base_uri": "https://localhost:8080/", "height": 424} outputId="06b16029-1445-468b-a279-31b59c684fd3"
-day_hr_df
+# %% id="IWvO-RZlqOPw" colab={"base_uri": "https://localhost:8080/", "height": 424} outputId="06b16029-1445-468b-a279-31b59c684fd3"
+print(day_hr_df)
 
-# + [markdown] id="aA_ZA_0OoTN9"
+# %% [markdown] id="aA_ZA_0OoTN9"
 # #### Step 2: Establish a Statistical Threshold
 #
 # The threshold is calculated by multiplying the standard deviation of the BPM differences by a factor. This factor is chosen to capture the most extreme variations, which are less probable to occur naturally.
 
-# + id="4NjC3jwKnr6s" colab={"base_uri": "https://localhost:8080/"} outputId="c7c0c6b1-d653-4c0a-8ad0-041737452bb4"
+# %% id="4NjC3jwKnr6s" colab={"base_uri": "https://localhost:8080/"} outputId="c7c0c6b1-d653-4c0a-8ad0-041737452bb4"
 # Calculate the standard deviation and mean of the differences
 mean_diff = day_hr_df["hr_diff"].mean()
 std_diff = day_hr_df["hr_diff"].std()
@@ -718,21 +719,21 @@ std_diff = day_hr_df["hr_diff"].std()
 threshold = 4 * std_diff
 threshold
 
-# + [markdown] id="tqp4pQZnoeQn"
+# %% [markdown] id="tqp4pQZnoeQn"
 # #### Step 3: Identify Conditional Outliers
 #
 # This step filters the data to find instances where the absolute value of the HRV difference exceeds our threshold, suggesting an unusual and abrupt change in BPM.
 
-# + id="Tb6IEcbXojJg"
+# %% id="Tb6IEcbXojJg"
 # Identify where the difference exceeds the threshold
 conditional_outliers = day_hr_df[abs(day_hr_df['hr_diff']) > threshold]
 
-# + [markdown] id="4G1X5gxvorK1"
+# %% [markdown] id="4G1X5gxvorK1"
 # #### Step 4: Visualize Outliers
 #
 # Visualization is crucial as it provides an immediate sense of where outliers occur in the dataset, offering insights into their potential causes and implications.
 
-# + id="igmiiB0Zoqvy" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="5c05c970-46f4-4b39-86c5-810cb43a1a47"
+# %% id="igmiiB0Zoqvy" colab={"base_uri": "https://localhost:8080/", "height": 573} outputId="5c05c970-46f4-4b39-86c5-810cb43a1a47"
 # Plot HRV data with conditional outliers highlighted
 plt.figure(figsize=(10, 6))
 plt.plot(day_hr_df['heart_rate'], label='heart rate data', alpha=0.7)
@@ -743,7 +744,7 @@ plt.xlabel('Time Index')
 plt.ylabel('Heart Rate')
 plt.show()
 
-# + [markdown] id="p1rLIIeTvi6J"
+# %% [markdown] id="p1rLIIeTvi6J"
 # # 9. Statistical Data Analysis
 #
 # Data isn't much without some analysis, so we're going to do some in this section. Please do not use the analyses below as evidence supporting any scientific claims. These analyses are purely intended for educational purposes.
@@ -759,32 +760,31 @@ plt.show()
 # #### Step 1: Data Loading and Preparation
 # Our first step would be extract the average SPO2 values that corresponding to the breathing rate during sleep. We will also merge the two dataframes.
 
-# + id="le_DDRbp5Ce4"
+# %% id="le_DDRbp5Ce4"
 spo2_df['date'] = spo2_df['minute'].dt.date
-
 
 day_spo2_df = spo2_df.groupby('date')['value'].mean().reset_index()
 
 day_spo2_df.columns = ['date', 'mean_spo2']
 
-# + id="eF2AAJgd5kSJ"
+# %% id="eF2AAJgd5kSJ"
 day_br_df = br_df[['datetime', 'fullSleepSummary']].copy()
 
 day_br_df.columns = ['date', 'mean_breath_rate']
 
-# + id="m5LW6Gf354Ew"
+# %% id="m5LW6Gf354Ew"
 day_spo2_df['date'] = pd.to_datetime(day_spo2_df['date'])
 day_br_df['date'] = pd.to_datetime(day_br_df['date'])
 
 # Merge the two DataFrames on the 'date' column
 merged_df = pd.merge(day_spo2_df, day_br_df, on='date')
 
-# + [markdown] id="EikZYjtJWbyp"
+# %% [markdown] id="EikZYjtJWbyp"
 # #### Step 2: Inject sleep apnea data
 #
 # Since our data simulates a healthy person, let us modify a proportion of data and reflect the data of a patient with sleep apnea.
 
-# + id="08TvgF5uWn74"
+# %% id="08TvgF5uWn74"
 # Simulate sleep apnea by modifying certain rows
 num_apnea_days = int(0.15 * len(merged_df))  # Simulate apnea on 15% of the days
 apnea_indices = np.random.choice(merged_df.index, num_apnea_days, replace=False)
@@ -793,11 +793,11 @@ for i in apnea_indices:
     merged_df.at[i, 'mean_spo2'] = random.uniform(91, 95)  # Lower SpO2 to simulate apnea
     merged_df.at[i, 'mean_breath_rate'] = random.uniform(12, 14)  # Lower breath rate to simulate apnea
 
-# + [markdown] id="oAABcyicWyNn"
+# %% [markdown] id="oAABcyicWyNn"
 # #### Step 3: Visualize the data
 #
 
-# + id="2CG8WIPEUG4k" colab={"base_uri": "https://localhost:8080/", "height": 704} outputId="e8699d1b-48a9-4f1d-d009-99114618bb53"
+# %% id="2CG8WIPEUG4k" colab={"base_uri": "https://localhost:8080/", "height": 704} outputId="e8699d1b-48a9-4f1d-d009-99114618bb53"
 import seaborn as sns
 sns.set(style="whitegrid")
 
@@ -827,7 +827,7 @@ ax2.legend(loc='upper right')
 
 plt.show()
 
-# + [markdown] id="2rRJJ5h1wtUO"
+# %% [markdown] id="2rRJJ5h1wtUO"
 # ### Using `jointplot` instead of line plots
 #
 # When examining the line plot above, it's evident that the patient experiences nights with both low average SpO2 levels and irregular breathing. However, if we were to investigate the correlation between SpO2 and breathing rate, it still remains ambiguous just by looking at the line plot.
@@ -836,7 +836,7 @@ plt.show()
 #
 # Furthermore, applying KMeans clustering to these data points can uncover distinct clusters, potentially revealing patterns or groups of nights with similar characteristics.
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 631} id="gU_tn-tSx0Bi" outputId="659ffff7-d56d-4e98-e1c1-1e4843a3bcc9"
+# %% colab={"base_uri": "https://localhost:8080/", "height": 631} id="gU_tn-tSx0Bi" outputId="659ffff7-d56d-4e98-e1c1-1e4843a3bcc9"
 from sklearn.cluster import KMeans
 
 # Prepare the data for clustering
@@ -863,14 +863,14 @@ g.ax_joint.legend_.remove()
 
 plt.show()
 
-# + [markdown] id="Wma596mzzZz5"
+# %% [markdown] id="Wma596mzzZz5"
 # ## 9.2 Breathing rates at different sleep stages
 #
 # We might also be interested if breathing rate changes in each stage. We can also use `seaborn` to plot histograms to visualize the distribution of breathing rates.
 #
 #
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 727} id="z9JztSsY0wR9" outputId="fd20a8a7-5eae-46d5-c21c-f5749cd04718"
+# %% colab={"base_uri": "https://localhost:8080/", "height": 727} id="z9JztSsY0wR9" outputId="fd20a8a7-5eae-46d5-c21c-f5749cd04718"
 # Plotting normalized histograms
 plt.figure(figsize=(12, 8))
 
@@ -884,10 +884,10 @@ plt.ylabel('Density')
 plt.legend()
 plt.show()
 
-# + [markdown] id="3s0H99UM1FOv"
+# %% [markdown] id="3s0H99UM1FOv"
 # Let us also look into the mean and standard deviation of breathing rates for each of the sleep stages.
 
-# + colab={"base_uri": "https://localhost:8080/"} id="YJTQGWgq1ETp" outputId="3071b987-2f18-454b-ac7a-54164b7eb6a4"
+# %% colab={"base_uri": "https://localhost:8080/"} id="YJTQGWgq1ETp" outputId="3071b987-2f18-454b-ac7a-54164b7eb6a4"
 deep_sleep_mean = br_df['deepSleepSummary'].mean()
 deep_sleep_std = br_df['deepSleepSummary'].std()
 
@@ -901,7 +901,7 @@ print(f"Deep Sleep - Mean: {deep_sleep_mean:.2f}, Std Dev: {deep_sleep_std:.2f}"
 print(f"REM Sleep - Mean: {rem_sleep_mean:.2f}, Std Dev: {rem_sleep_std:.2f}")
 print(f"Light Sleep - Mean: {light_sleep_mean:.2f}, Std Dev: {light_sleep_std:.2f}")
 
-# + [markdown] id="ysQhCLAr3b82"
+# %% [markdown] id="ysQhCLAr3b82"
 # For distributions like this one, we can use Analysis of Variance (ANOVA) to determine if the distributions are significantly distinct.
 #
 # ### Analysis of Variance (ANOVA)
@@ -914,7 +914,7 @@ print(f"Light Sleep - Mean: {light_sleep_mean:.2f}, Std Dev: {light_sleep_std:.2
 #
 # Here, we can simly input our three distributions into the `f_oneway` function from `scipy.stats` and inspect the resulting p-value. If the p-value is less than 0.05, it indicates that there is a significant difference between sleep stages.
 
-# + colab={"base_uri": "https://localhost:8080/", "height": 800} id="9RwdtAeC2A4z" outputId="3a17a7c3-0cff-4e78-8951-f7fcb41aab03"
+# %% colab={"base_uri": "https://localhost:8080/", "height": 800} id="9RwdtAeC2A4z" outputId="3a17a7c3-0cff-4e78-8951-f7fcb41aab03"
 from scipy.stats import f_oneway
 
 # Perform ANOVA
@@ -948,10 +948,10 @@ plt.axvline(x=light_sleep_mean, color='orange', linestyle='--', linewidth=0.8, l
 plt.legend()
 plt.show()
 
-# + [markdown] id="HZbM2Pbz1OS7"
+# %% [markdown] id="HZbM2Pbz1OS7"
 # The p-value is far less than 0.05, indicating that the null hypothesis that all groups have the same mean is rejected. This suggests that there is a correlation between breathing rate and sleep stage.
 #
 # This does make sense, since the deep sleep stage typically involves slower and more regular breathing patterns, resulting in a lower mean breathing rate with relatively low variability. Conversely, the REM sleep stage involves rapid eye movements and vivid dreaming, exhibits a higher mean breathing rate along with a slightly higher standard deviation, reflecting the intermittent nature of breathing during this stage. Lastly, light sleep, which acts as a transition between deep sleep and wakefulness, displays an intermediate mean breathing rate and standard deviation.
 
-# + [markdown] id="sYF1PxNmFkLk"
+# %% [markdown] id="sYF1PxNmFkLk"
 # Lastly, please be reminded that the data presented and any subsequent results are purely synthetic and intended only for demonstrative purposes. They do not reflect actual biological data or clinical findings. This synthetic approach is only used to illustrate data processing, visualization, and analytical techniques.
