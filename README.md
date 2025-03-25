@@ -1,7 +1,7 @@
 # Wearable-notebooks
 List of notebooks from [Wearipedia.com](http://wearipedia.com).
 
-## This repository uses [jupytext](https://jupytext.readthedocs.io/en/latest/). If you're simply cloning and using these notebooks, you should be able to use the .ipynb files directly through Jupyter as normal. If you want to contribute, please familiarize yourself with jupytext and install it. When making changes, you should check in both files (.py, .ipynb) of the paired notebook.
+This repository uses [jupytext](https://jupytext.readthedocs.io/en/latest/). If you're simply cloning and using these notebooks, you should be able to use the .ipynb files directly through Jupyter as normal. If you want to contribute, please familiarize yourself with jupytext and install it. When making changes, you should check in both files (.py, .ipynb) of the paired notebook.
 
 #### Fitness trackers
 * Oura Ring Gen 3
