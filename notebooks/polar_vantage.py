@@ -3,8 +3,8 @@
 #   jupytext:
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 #       jupytext_version: 1.16.7
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
@@ -12,18 +12,25 @@
 #     name: python3
 # ---
 
+# %% [markdown]
 # # Polar Vantage V2: Guide to data extraction and analysis
 
+# %% [markdown]
 # <img src='https://i.imgur.com/xqJvlna.jpeg' height="500"> 
 
+# %% [markdown]
 # A picture of the Polar Mobile Application
 
+# %% [markdown]
 # Where do polar bears go to vote? <br>The North Pole.
 
+# %% [markdown]
 # In this notebook, we would definitely not be visiting the North Pole to watch Polar bears vote. Instead, we will be using the [Polar Vantage V2](https://www.polar.com/en/vantage/v2) which is a smart watch designed for carefully monitoring the most important muscle in your body -- your body. The watch is equipped with advanced wrist-based HR tracking, GPS, ultra-long battery life, running & cycling performance tests, FuelWise, route guidance, sleep tracking, & more. The Vantage V2 can also be utlized to record more than 130 popular sports. It also has an app that you can utilize to view reports on your data.
 
+# %% [markdown]
 # This is a comprehensive, clear guide to extract your data from the Polar Flow App using the Wearipedia package.
 
+# %% [markdown]
 # We will be able to extract the following parameters:
 #
 # Parameter Name  | Sampling Frequency 
@@ -47,8 +54,10 @@
 # Breathing Rate Average | Per Night
 # <b>Heart Rate Average</b> | Per Night
 
+# %% [markdown]
 # ** These datatypes are all subsets of sleep and training history.
 
+# %% [markdown]
 # In this guide, we sequentially cover the following **nine** topics to extract data from Cronometer servers:
 #
 # 1. **Setup**<br>
@@ -73,6 +82,7 @@
 #
 # Disclaimer: this notebook is purely for educational purposes. All of the data currently stored in this notebook is purely *synthetic*, meaning randomly generated according to rules we created. Despite this, the end-to-end data extraction pipeline has been tested on our own data, meaning that if you enter your own email and password on your own Colab instance, you can visualize your own *real* data. That being said, we were unable to thoroughly test the timezone functionality, though, since we only have one account, so beware.
 
+# %% [markdown]
 # # 1. Setup
 #
 # ## Participant Setup
@@ -100,9 +110,11 @@
 # 5. Install the `wearipedia` Python package to easily extract data from this device via the Polar API.
 #
 
+# %%
 # !pip install wearipedia
 # !pip install openpyxl
 
+# %%
 import wearipedia
 import pandas as pd
 import json
@@ -117,52 +129,61 @@ from scipy import stats
 from sklearn.covariance import EllipticEnvelope
 import copy
 
+# %% [markdown]
 # # 2. Authentication and Authorization
 #
-# To obtain access to data, authorization is required. All you'll need to do here is just put in your email and password for your Polar account. We'll use this username and password to extract the data in the sections below.
+# To obtain access to data, authorization is required. Polar uses OAuth2 authentication, so you'll have to create an application following the "How to get started" steps here: https://www.polar.com/accesslink-api/?srsltid=AfmBOoq1zjnX5TxZEPRJT5x-JaRTDuzm3sTRokASwvOvkzVQ92edkh6c#how-to-get-started
+#
+# For the client, you can use localhost:8080 as the URL and "https://test.com" or any other domain for the web site.
 
-#@title Enter Cronometer login credentials
-email_address = "test@stanford.edu" #@param {type:"string"}
-password = "putyourpasswordhere" #@param {type:"string"}
-
+# %% [markdown]
 # # 3. Data Extraction
 #
 # Data can be extracted via [wearipedia](https://github.com/Stanford-Health/wearipedia/), our open-source Python package that unifies dozens of complex wearable device APIs into one simple, common interface.
 #
 # First, we'll set a date range and then extract all of the data within that date range. You can select whether you would like synthetic data or not with the checkbox.
 
-# +
+# %%
 #@title Enter start and end dates (in the format yyyy-mm-dd)
 
-#set start and end dates - this will give you all the data from 2000-01-01 (January 1st, 2000) to 2100-02-03 (February 3rd, 2100), for example
-start_date='2022-01-01' #@param {type:"string"}
-end_date='2022-08-28' #@param {type:"string"}
-synthetic = True #@param {type:"boolean"}
+start_date='2025-02-01' #@param {type:"string"}
+end_date='2025-03-01' #@param {type:"string"}
+synthetic = False #@param {type:"boolean"}
 
-# +
+# %%
 device = wearipedia.get_device("polar/vantage")
 
+access_token = "" #@param {type: "string"}
+user_id = "" #@param {type: "string"}
+# If you don't input the access id or user id, the authentication will walk you through the process interactively.
 if not synthetic:
-    device.authenticate({"email": email_address, "password": password})
+    device.authenticate({"access_token": access_token, "user_id": user_id})
 
 params = {"start_date": start_date, "end_date": end_date, 'training_id':'7472390363'}
-# -
 
+# %% [markdown]
 # Let's first extract the sleep data and plot the head of the dataframe
 
+# %%
 sleep = device.get_data("sleep", params=params)
 pd.DataFrame(sleep).head()
 
+# %% [markdown]
 # Next, let's plot the training history
 
-training_history = device.get_data("training_history", params=params)
+# %%
+training_history = device.get_data("training_data", params=params)
+print(training_history)
 pd.DataFrame(training_history).head()
 
+# %% [markdown]
 # Lastly, using wearipedia we can also extract this training by id.
 
+# %%
 training_by_id = device.get_data("training_by_id", params=params)
 pd.DataFrame(training_by_id).head()
 
+# %% [markdown]
 # # 4. Data Exporting
 #
 # In this section, we export all of this data to formats compatible with popular scientific computing software (R, Excel, Google Sheets, Matlab). Specifically, we will first export to JSON, which can be read by R and Matlab. Then, we will export to CSV, which can be consumed by Excel, Google Sheets, and every other popular programming language.
@@ -171,9 +192,10 @@ pd.DataFrame(training_by_id).head()
 #
 # Exporting to JSON is fairly simple. We export each datatype separately and also export a complete version that includes all simultaneously.
 
+# %%
 training_history[:3]
 
-# +
+# %%
 # Convert int64 values to regular Python integers
 for value in training_history:
     for key in value:
@@ -191,8 +213,8 @@ complete = {
 }
 
 json.dump(complete, open("complete.json", "w"))
-# -
 
+# %% [markdown]
 # Feel free to open the file viewer (see left pane) to look at the outputs!
 #
 # ## Exporting to CSV and XLSX (Excel, Google Sheets, R, Matlab, etc.)
@@ -201,7 +223,7 @@ json.dump(complete, open("complete.json", "w"))
 #
 # We will thus export steps, heart rates, and breath rates all as separate files.
 
-# +
+# %%
 sleep_df = pd.DataFrame.from_dict(sleep)
 
 sleep_df.to_csv('sleep.csv')
@@ -217,10 +239,11 @@ training_by_id_df = pd.DataFrame.from_dict(training_by_id)
 training_by_id_df.to_csv('exercises.csv', index=False)
 training_by_id_df.to_excel('exercises.xlsx', index=False)
 
-# -
 
+# %% [markdown]
 # Again, feel free to look at the output files and download them.
 
+# %% [markdown]
 # # 5. Adherence
 #
 # The device simulator already automatically randomly deletes small chunks of the day. In this section, we will simulate non-adherence over longer periods of time from the participant (day-level and week-level).
@@ -229,11 +252,12 @@ training_by_id_df.to_excel('exercises.xlsx', index=False)
 #
 # We will first delete a certain % of blocks either at the day level or week level, with user input.
 
+# %%
 #@title Non-adherence simulation
 block_level = "day" #@param ["day", "week"]
 adherence_percent = 0.89 #@param {type:"slider", min:0, max:1, step:0.01}
 
-# +
+# %%
 import numpy as np
 
 if block_level == "day":
@@ -273,17 +297,20 @@ sleep = AdherenceSimulator(sleep)
 # Adding adherence for exercises
 
 training_history = AdherenceSimulator(training_history)
-# -
 
+# %% [markdown]
 # And now we have significantly fewer datapoints! This will give us a more realistic situation, where participants may take off their device for days or weeks at a time.
 #
 # Now let's detect non-adherence. We will return a Pandas DataFrame sampled at every day.
 
+# %%
 sleep_df = pd.DataFrame.from_dict(sleep)
 training_history_df = pd.DataFrame.from_dict(training_history)
 
+# %% [markdown]
 # We can plot this out, and we get adherence at one-day frequency throughout the entirety of the data collection period. For this chart we will plot Energy consumed over the time period from the dailySummary dataframe.
 
+# %%
 plt.figure(figsize=(12, 6))
 sns.barplot(x=sleep_df.date, y=sleep_df.sleepScore)
 plt.ylabel('Sleep Score')
@@ -291,13 +318,14 @@ plt.xlabel('Date')
 plt.xticks(rotation=45)
 plt.show()
 
+# %% [markdown]
 # # 6. Visualization
 #
 # We've extracted lots of data, but what does it look like?
 #
 # In this section, we will be visualizing our three kinds of data in a simple, customizable plot! This plot is intended to provide a starter example for plotting, whereas later examples emphasize deep control and aesthetics.
 
-# +
+# %%
 #@title Basic Plot
 feature = "Training Recovery Time" #@param ['Training Calories', 'Training Average Heart Rate','Training Distance','Training Recovery Time']
 start_date = "2022-04-21" #@param {type:"date"}
@@ -409,25 +437,30 @@ with plt.style.context('ggplot'):
     plt.xlabel("Date")
     plt.xticks(ts)
     plt.ylabel(title_fillin)
-# -
 
+# %% [markdown]
 # This plot allows you to quickly scan your data at many different time scales (week and full) and for different kinds of measurements (heart rate and weight), which enables easy and fast data exploration.
 #
 # Furthermore, the smoothness parameter makes it easy to look for patterns in long-term trends.
 
+# %% [markdown]
 # # 7. Advanced Visualization
 #
 # Now we'll do some more advanced plotting that at times features hardcore matplotlib hacking with the benefit of aesthetic quality.
 
+# %% [markdown]
 # ## 7.1 Visualizing Participants Sleep Breakdown
 
+# %% [markdown]
 # Polar Vantage V2 has an inbuilt sleep/recovery tracker which allows the participant to track their Sleep into different stages. On the polar flow app, a user can go into their nightly recharge breakdown to check their Hypnograms. The plar flow app should show you the following chart:
 
+# %% [markdown]
 # <img src='https://i.imgur.com/HNXVQar.jpg' width='750px'>
 
+# %% [markdown]
 # Before getting started with data wrangling, in the box below input the date for which you want to draw the specific plot.
 
-# +
+# %%
 #@title Set date for the chart below
 
 plot_date = "2022-05-12" #@param {type:"date"}
@@ -619,17 +652,20 @@ ax2.spines['left'].set_visible(False)
 ax2.spines['bottom'].set_visible(False)
 
 plt.show()
-# -
 
+# %% [markdown]
 # *^ Above is the plot that we created ourselves!*
 
+# %% [markdown]
 # ## 7.2 Visualizing Weekly Sleep Summary
 
+# %% [markdown]
 # Along with the detailed sleep breakdown, our Polar Vantage also provides information on weekly sleep breakdown. For our next plot, let's recreate the following plot from the Polar Flow app.
 
+# %% [markdown]
 # <img src='https://i.imgur.com/jog0iGJ.jpg' width='600px'>
 
-# +
+# %%
 #@title Set date for the chart below
 
 plot_date = "2022-05-15" #@param {type:"date"}
@@ -721,24 +757,30 @@ plt.text(0.71,0.9,'—', transform=plt3.transFigure,
          color='#0C9AE0',fontsize=50)
 
 plt.show()
-# -
 
+# %% [markdown]
 # # 8. Statistical Data Analysis
 
+# %% [markdown]
 # According to a [course](https://www.uh.edu/class/ctr-public-history/tobearfruit/__docs/curriculum/ms/science/conxnbetwrespandhrtrate/lessonplan_conxnbetwrespandhrtrate.pdf) taught at the University of Huston, "The more the heart beats, the more breathing occurs. As the heart beats faster, it uses more energy and sends more oxygen to the body. If a person is exercising the oxygen is used very quickly in order to provide the muscles with needed energy to move."
 
+# %% [markdown]
 # **Our test hypothesis will be that Heart Rate and Calories Burned are correlated.**
 
+# %% [markdown]
 # In this portion of the notebook, we will be testing this exact hypothesis using the data that we fetched from the Polar Vantage 3.
 
+# %% [markdown]
 # First, let's get the required data from the training_history_df dataframe
 
+# %%
 test_data = training_history_df.get(['calories','hrAvg'])
 test_data.head()
 
+# %% [markdown]
 # Let's create a quick plot on this to see if there is a correlation between these two values.
 
-# +
+# %%
 # Setting Figure Size in Seaborn
 sns.set(rc={'figure.figsize':(16,8)})
 
@@ -753,34 +795,39 @@ plot.set_ylabel("Breathing Rate", fontsize = 16)
 plot.set_xlabel("Heart Rate", fontsize = 16)
 
 print()
-# -
 
+# %% [markdown]
 # Looking at the graph, we can see a line of regression which hints that Breathing and Heart Rate are directly correlated. However, there seems to be too much variability in the data. In the next line, we will prove this statistically.
 
-# +
+# %%
 slope, intercept, r_value, p_value, std_err = stats.linregress(
     test_data.get('calories'), test_data.get('hrAvg'))
 
 print(f'Slope: {slope:.3g}')
 print(f'Coefficient of determination: {r_value**2:.3g}')
 print(f'p-value: {p_value:.3g}')
-# -
 
+# %% [markdown]
 # The p-value for this is 0.875% which is much smaller than the 5% cutoff. This means that there is enough evidence to convincingly conclude that that there is a correlation between Avg Heart Rate and Calories Burned.
 
+# %% [markdown]
 # # 9. Outlier Detection and Data Cleaning
 
+# %% [markdown]
 # However, even though our P value seems to provide enough statistical significance that there is a correlation between Avg Heart Rate and Calories Burned, there might be outliers that are not following this correlation. In this section of our analysis, we will find if there are outliers like that and if they exist, we will visually highlight them in our plot.
 
+# %% [markdown]
 # Before finding the individual outlier values, it would be interesting to see the summary of our Avg heart Rate and Calories Consumed. It will give us a clear idea of what values are typical and which values can be considered atypical based on the data that we recieved from Cronometer.
 
+# %%
 test_data.describe()
 
+# %% [markdown]
 # To locate the outliers we will be using a supervised as well as unsupervised algorithm called the Elliptic Envelope. In statistical studies, Elliptic Envelope created an imaginary elliptical area around a given dataset where values inside that imaginary area is considered to be normal data, and anything else is assumed to be outliers. It assumes that the given Data follows a gaussian distribution.
 #
 # "The main idea is to define the shape of the data and anomalies are those observations that lie far outside the shape. First a robust estimate of covariance of data is fitted into an ellipse around the central mode. Then, the Mahalanobis distance that is obtained from this estimate is used to define the threshold for determining outliers or anomalies." [(S. Shriram and E. Sivasankar ,2019, pp. 221-225)](https://ieeexplore.ieee.org/document/9004325)
 
-# +
+# %%
 # Sometimes EllipticEnvelope shows slicing based copy warnings
 # The next line changes a setting that prevents the error from happening
 
@@ -806,23 +853,27 @@ test_data["EE_scores"] = EE_model.score_samples(
 
 #print the value counts for inlier and outliers
 print(test_data["outlier"].value_counts())
-# -
 
+# %% [markdown]
 # Below we will replot the test_data dataframe to see how the two new columns were applied to it!
 
+# %%
 test_data.head()
 
+# %% [markdown]
 #
 # Now that we have labeled the outliers as -1, let's try to see which values of average heart rate and calories are being identified as outliers by our Elliptic Envelope Algorithm.
 
+# %%
 outlier_df = test_data[test_data.get('outlier')=='-1'].get(
     ['calories','hrAvg'])
 outlier_df_cleaned = outlier_df.drop_duplicates()
 outlier_df_cleaned
 
+# %% [markdown]
 # Sweet, now that we know that there were outliers in our dataset, let's try to visually see which pair of values are being identified as outliers using a plot. Highlighting these outliers in a bright red color will make it super easy for us to identify them in our plot.
 
-# +
+# %%
 # Setting Figure Size in Seaborn
 sns.set(rc={'figure.figsize':(16,8)})
 
@@ -838,11 +889,11 @@ plt.scatter(outlier_df_cleaned.get('calories'),outlier_df_cleaned.get('hrAvg'),
             facecolors='red',alpha=.35, s=500)
 
 plt.show()
-# -
 
+# %% [markdown]
 # Thus, the points highlighted in red are ones that seem to not be following the general trend of our dataset. Lastly, let's see what the new p-value is after outlier removal!
 
-# +
+# %%
 slope, intercept, r_value, p_value, std_err = stats.linregress(
     test_data.drop(outlier_df.index).get('calories'),
      test_data.drop(outlier_df.index).get('hrAvg'))
@@ -850,6 +901,6 @@ slope, intercept, r_value, p_value, std_err = stats.linregress(
 print(f'Slope: {slope:.3g}')
 print(f'Coefficient of determination: {r_value**2:.3g}')
 print(f'p-value: {p_value:.3g}')
-# -
 
+# %% [markdown]
 # The p-value for this is 0.0115 which is much smaller than the 5% cutoff. This means that there is enough evidence to convincingly conclude that that there is a correlation between Heart Rate and Calories Burned.
